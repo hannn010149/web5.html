@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hanif | AI Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ========================================================
+           1. CSS OPENING SCREEN (INTRO LOADING)
+           ======================================================== */
+        #introLoading {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, #030a16 0%, #000000 100%);
+            z-index: 99999; display: flex; justify-content: center; align-items: center;
+            overflow: hidden; transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #introLoading.fade-out { opacity: 0; visibility: hidden; }
+        #fxCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .intro-content {
+            position: relative; z-index: 10; text-align: center; width: 90%; max-width: 600px;
+            opacity: 0; transform: scale(0.8); transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .intro-content.show { opacity: 1; transform: scale(1); }
+        .intro-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 36px; font-weight: 800; color: #ffffff; line-height: 1.2; margin-bottom: 5px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        .intro-title span { display: block; color: #3b82f6; font-size: 40px; text-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.4); }
+        .loading-container { width: 100%; max-width: 250px; margin: 20px auto 0; opacity: 0; transition: opacity 0.5s ease 0.2s; }
+        .intro-content.show .loading-container { opacity: 1; }
+        .loading-text { display: flex; justify-content: space-between; font-family: 'Plus Jakarta Sans', sans-serif; color: #94a3b8; font-size: 10px; font-weight: 600; letter-spacing: 1px; margin-bottom: 5px; }
+        .progress-track { width: 100%; height: 2px; background: rgba(255, 255, 255, 0.2); border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: #ffffff; box-shadow: 0 0 10px #ffffff; transition: width 0.05s linear; }
+
+        /* ========================================================
+           2. CSS WEBSITE UTAMA
+           ======================================================== */
+        :root {
+            --bg-color: #050814; --card-bg: rgba(20, 26, 43, 0.6); --text-main: #ffffff;
+            --text-muted: #94a3b8; --primary: #3b82f6; --border: rgba(255, 255, 255, 0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; overflow-x: hidden;
+            background-image: radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)), radial-gradient(1.5px 1.5px at 50px 160px, #ffffff, rgba(0,0,0,0)), radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)), radial-gradient(1.5px 1.5px at 130px 80px, #ffffff, rgba(0,0,0,0));
+            background-repeat: repeat; background-size: 250px 250px;
+        }
+        .navbar { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 50px; display: flex; gap: 5px; padding: 6px; z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
+        .navbar a { color: var(--text-muted); text-decoration: none; padding: 10px 24px; font-size: 14px; font-weight: 600; border-radius: 40px; transition: 0.3s; }
+        .navbar a:hover, .navbar a.active { background: rgba(255, 255, 255, 0.1); color: var(--text-main); }
+        .container { max-width: 650px; margin: 0 auto; padding: 120px 20px 60px 20px; }
+        section { margin-bottom: 100px; }
+        .title-center { text-align: center; font-size: 32px; font-weight: 800; margin-bottom: 40px; }
+        .blue-text { color: var(--primary); }
+        .hero h1 { font-size: 48px; line-height: 1.1; margin-bottom: 15px; }
+        .hero .role { font-size: 20px; color: var(--text-muted); margin-bottom: 25px; }
+        .hero p { color: var(--text-muted); margin-bottom: 30px; font-size: 16px; }
+        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 50px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; transition: 0.3s; gap: 10px; flex: 1; min-width: 200px; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: white; border: none; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-outline { border: 1px solid var(--border); color: var(--text-main); background: transparent; }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+        .glass-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; backdrop-filter: blur(10px); margin-bottom: 20px; }
+        
+        /* --- SPOTIFY CARD --- */
+        .spotify-card h3 { font-size: 22px; margin-bottom: 5px; }
+        .spotify-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 15px;}
+        .spotify-embed { border-radius: 12px; overflow: hidden; min-height: 352px; /* Biar gak lompat pas loading */}
+
+        .spiderman-img { width: 100%; max-width: 300px; display: block; margin: 0 auto 30px auto; border-radius: 20px; box-shadow: 0 0 50px rgba(59, 130, 246, 0.2); }
+        .about-text h2 { font-size: 32px; margin-bottom: 15px; }
+        .about-text h2 span { color: var(--primary); }
+        .tab-menu { display: flex; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 5px; margin-bottom: 30px; overflow-x: auto; }
+        .tab-btn { flex: 1; background: transparent; border: none; color: var(--text-muted); padding: 12px 5px; border-radius: 12px; cursor: pointer; font-size: 12px; font-family: inherit; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 8px; white-space: nowrap; }
+        .tab-btn i { font-size: 18px; }
+        .tab-btn:hover { color: white; }
+        .tab-btn.active { background: rgba(59, 130, 246, 0.15); color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .tech-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 25px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; transition: 0.3s; cursor: default; }
+        .tech-item:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+        .tech-item i { font-size: 40px; }
+        .tech-item span { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .social-links { display: flex; flex-direction: column; gap: 15px; }
+        .social-item { display: flex; align-items: center; gap: 15px; background: var(--card-bg); border: 1px solid var(--border); padding: 18px; border-radius: 16px; text-decoration: none; color: white; transition: 0.3s; }
+        .social-item:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); }
+        .social-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .ig-bg { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .tiktok-bg { background: #000; color: white; border: 1px solid #333; }
+        .social-info h4 { font-size: 16px; margin-bottom: 2px; }
+        .social-info p { font-size: 13px; color: var(--text-muted); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 16px; color: var(--text-muted); }
+        .form-control { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; padding: 15px 15px 15px 45px; color: white; font-family: inherit; font-size: 14px; outline: none; transition: 0.3s; }
+        .form-control:focus { border-color: var(--primary); background: rgba(0,0,0,0.4); }
+        textarea.form-control { min-height: 120px; resize: vertical; padding-left: 15px; }
+        .comment-list { margin-top: 30px; }
+        .comment-item { display: flex; gap: 15px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+        .comment-item:last-child { border-bottom: none; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
+        .comment-content h4 { font-size: 15px; margin-bottom: 5px; }
+        .comment-content span { font-size: 12px; color: var(--text-muted); margin-left: 10px; font-weight: 400;}
+        .comment-content p { font-size: 14px; color: var(--text-muted); }
+
+        /* ========================================================
+           3. CSS POP-UP RESUME (MODAL)
+           ======================================================== */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+            z-index: 10000; justify-content: center; align-items: center; padding: 20px;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: #0d1526; border: 1px solid var(--border);
+            border-radius: 20px; width: 100%; max-width: 600px; max-height: 85vh;
+            overflow-y: auto; padding: 30px; position: relative;
+            transform: translateY(20px); transition: transform 0.3s ease;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .close-btn {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255,255,255,0.1); border: none; color: white;
+            width: 35px; height: 35px; border-radius: 50%; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; transition: 0.3s;
+        }
+        .close-btn:hover { background: #ef4444; transform: rotate(90deg); }
+        .resume-title { font-size: 24px; font-weight: 800; margin-bottom: 25px; text-align: center; }
+        .resume-title span { color: var(--primary); }
+        .resume-section { margin-bottom: 25px; }
+        .resume-section h3 { font-size: 16px; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .resume-item { margin-bottom: 15px; }
+        .resume-item h4 { font-size: 15px; font-weight: 600; color: white; }
+        .resume-item p { font-size: 13px; color: var(--text-muted); }
+        .resume-item .date { font-size: 12px; color: var(--primary); margin-bottom: 5px; display: inline-block; }
+        .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-tag { background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- OPENING SCREEN (PARTICLE CONVERGENCE)      -->
+    <!-- ========================================== -->
+    <div id="introLoading">
+        <canvas id="fxCanvas"></canvas>
+        <div class="intro-content" id="introContent">
+            <h1 class="intro-title">
+                Welcome To My<br>
+                <span>Portofolio Website</span>
+            </h1>
+            <div class="loading-container">
+                <div class="loading-text">
+                    <span>Loading</span>
+                    <span id="loadPercent">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- POP-UP MODAL RESUME (DATA HANIF)           -->
+    <!-- ========================================== -->
+    <div class="modal-overlay" id="resumeModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeResume()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <h2 class="resume-title">Resume <span>Hanif</span></h2>
+
+            <div class="resume-section">
+                <h3><i class="fa-solid fa-user"></i> Biodata Diri</h3>
+                <div class="resume-item">
+                    <h4>Nama Lengkap: Hanif</h4>
+                    <p>Umur: 15 Tahun</p>
+                    <p>Alamat: Jakarta Selatan</p>
+                </div>
+            </div>
+
+            <div class="resume-section">
+                <h3><i class="fa-solid fa-graduation-cap"></i> Pendidikan</h3>
+                <div class="resume-item">
+                    <span class="date">Saat Ini</span>
+                    <h4>SMP Perguruan Rakyat 1</h4>
+                    <p>Siswa aktif yang sedang mendalami dunia teknologi dan kecerdasan buatan (AI).</p>
+                </div>
+            </div>
+
+            <div class="resume-section">
+                <h3><i class="fa-solid fa-briefcase"></i> Pengalaman & Fokus</h3>
+                <div class="resume-item">
+                    <span class="date">2024 - Sekarang</span>
+                    <h4>AI Developer (Learner)</h4>
+                    <p>Membangun dasar-dasar logika pemrograman dan bereksperimen dengan model AI sederhana.</p>
+                </div>
+            </div>
+
+            <div class="resume-section">
+                <h3><i class="fa-solid fa-code"></i> Keahlian (Skills)</h3>
+                <div class="skill-tags">
+                    <span class="skill-tag">HTML & CSS</span>
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">React (Dasar)</span>
+                    <span class="skill-tag">AI Prompting</span>
+                </div>
+            </div>
+
+            <a href="#contact" class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="closeResume()">
+                <i class="fa-regular fa-envelope"></i> Hubungi Saya
+            </a>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- WEBSITE UTAMA (PORTFOLIO HANIF)            -->
+    <!-- ========================================== -->
+
+    <nav class="navbar">
+        <a href="#home" class="active">Home</a>
+        <a href="#about">About</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="hero">
+            <h1>Turning Data<br>Into <span class="blue-text">Intelligence</span></h1>
+            <div class="role">AI Developer</div>
+            <p>Dimulai dari rasa penasaran, berkembang menjadi passion. Aku membangun solusi berbasis kecerdasan buatan yang tidak hanya pintar secara algoritma, tapi juga memberikan dampak nyata bagi penggunanya.</p>
+            
+            <div class="btn-group">
+                <button onclick="openResume()" class="btn btn-primary"><i class="fa-regular fa-file-lines"></i> View Resume</button>
+                <a href="#contact" class="btn btn-outline">Contact Me <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+
+            <div class="glass-card spotify-card">
+                <h3>Daily Rotation</h3>
+                <p>My Spotify Playlist...</p>
+                <div class="spotify-embed" id="spotifyContainer">
+                    <!-- Iframe Spotify dikosongkan dulu, nanti dimuat oleh JS setelah loading selesai -->
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <h2 class="title-center">About Me</h2>
+            <img src="https://images.unsplash.com/photo-1635863138275-d9b33299680b?q=80&w=600&auto=format&fit=crop" alt="Spiderman" class="spiderman-img">
+            <div class="about-text">
+                <h2>Hi, I'm <br><span>Hanif</span></h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px;">Seorang siswa berumur 15 tahun dari Jakarta Selatan yang berfokus pada pengembangan teknologi dan AI. Menghadirkan pengalaman digital yang menarik dan berdampak.</p>
+            </div>
+        </section>
+
+        <section id="portfolio">
+            <h2 class="title-center">Portofolio</h2>
+            <div class="tab-menu">
+                <button class="tab-btn" onclick="openTab('projects', this)"><i class="fa-solid fa-code"></i><br>Projects</button>
+                <button class="tab-btn" onclick="openTab('certificates', this)"><i class="fa-solid fa-certificate"></i><br>Certificates</button>
+                <button class="tab-btn" onclick="openTab('awards', this)"><i class="fa-solid fa-trophy"></i><br>Awards</button>
+                <button class="tab-btn active" onclick="openTab('techstack', this)"><i class="fa-solid fa-cubes"></i><br>Tech Stack</button>
+            </div>
+
+            <div id="projects" class="tab-content">
+                <div class="glass-card" style="text-align: center; padding: 50px 20px;">
+                    <i class="fa-solid fa-folder-open" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                    <p style="color: var(--text-muted);">Belum ada proyek yang ditampilkan.</p>
+                </div>
+            </div>
+            <div id="certificates" class="tab-content">
+                <div class="glass-card" style="text-align: center; padding: 50px 20px;">
+                    <i class="fa-solid fa-certificate" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                    <p style="color: var(--text-muted);">Belum ada sertifikat yang ditampilkan.</p>
+                </div>
+            </div>
+            <div id="awards" class="tab-content">
+                <div class="glass-card" style="text-align: center; padding: 50px 20px;">
+                    <i class="fa-solid fa-trophy" style="font-size: 40px; color: var(--text-muted); margin-bottom: 15px;"></i>
+                    <p style="color: var(--text-muted);">Belum ada penghargaan yang ditampilkan.</p>
+                </div>
+            </div>
+            <div id="techstack" class="tab-content active">
+                <div class="tech-grid">
+                    <div class="tech-item"><i class="fa-brands fa-html5" style="color: #E34F26;"></i><span>HTML</span></div>
+                    <div class="tech-item"><i class="fa-brands fa-css3-alt" style="color: #1572B6;"></i><span>CSS</span></div>
+                    <div class="tech-item"><i class="fa-brands fa-square-js" style="color: #F7DF1E;"></i><span>JavaScript</span></div>
+                    <div class="tech-item"><i class="fa-solid fa-wind" style="color: #38BDF8;"></i><span>Tailwind CSS</span></div>
+                    <div class="tech-item"><i class="fa-brands fa-react" style="color: #61DAFB;"></i><span>React</span></div>
+                    <div class="tech-item"><i class="fa-solid fa-bolt" style="color: #646CFF;"></i><span>Vite</span></div>
+                    <div class="tech-item"><i class="fa-brands fa-node-js" style="color: #339933;"></i><span>Node JS</span></div>
+                    <div class="tech-item"><i class="fa-brands fa-bootstrap" style="color: #7952B3;"></i><span>Bootstrap</span></div>
+                    <div class="tech-item"><i class="fa-solid fa-database" style="color: #3ECF8E;"></i><span>Supabase</span></div>
+                    <div class="tech-item"><i class="fa-solid fa-layer-group" style="color: #007FFF;"></i><span>Material UI</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2 class="title-center">Hubungi Saya</h2>
+            <div class="social-links" style="margin-bottom: 30px;">
+                <a href="https://www.instagram.com/hanif11_12" target="_blank" class="social-item">
+                    <div class="social-icon ig-bg"><i class="fa-brands fa-instagram"></i></div>
+                    <div class="social-info"><h4>Instagram</h4><p>@hanif11_12</p></div>
+                </a>
+                <a href="https://tiktok.com/@hanif11_61" target="_blank" class="social-item">
+                    <div class="social-icon tiktok-bg"><i class="fa-brands fa-tiktok"></i></div>
+                    <div class="social-info"><h4>TikTok</h4><p>@hanif11_61</p></div>
+                </a>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="color: var(--primary); margin-bottom: 10px;">Hubungi</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Ada yang mau didiskusikan? Langsung kirim pesan aja ya..!</p>
+                
+                <form action="https://formsubmit.co/aafkfisit@gmail.com" method="POST">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_subject" value="Pesan Baru dari Portofolio Hanif!">
+                    <input type="hidden" name="_template" value="table">
+
+                    <div class="form-group">
+                        <label>Nama Anda</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-user"></i>
+                            <input type="text" name="name" class="form-control" placeholder="Nama Anda" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Anda</label>
+                        <div class="input-wrapper">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input type="email" name="email" class="form-control" placeholder="Email Anda" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pesan Anda</label>
+                        <textarea name="message" class="form-control" placeholder="Pesan Anda" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-regular fa-paper-plane"></i> Kirim Pesan</button>
+                </form>
+            </div>
+
+            <div class="glass-card" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 20px;"><i class="fa-regular fa-comment-dots" style="margin-right: 10px;"></i> Komentar</h3>
+                <form id="commentForm">
+                    <div class="form-group">
+                        <label>Nama</label>
+                        <input type="text" id="cName" class="form-control" style="padding-left: 15px;" placeholder="Masukkan nama kamu" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Komentar</label>
+                        <textarea id="cText" class="form-control" style="padding-left: 15px;" placeholder="Tulis komentar kamu di sini..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-regular fa-paper-plane"></i> Kirim Komentar</button>
+                </form>
+                <div class="comment-list" id="commentList">
+                    <div class="comment-item">
+                        <div class="avatar">F</div>
+                        <div class="comment-content">
+                            <h4>Fan <span>Baru saja</span></h4>
+                            <p>Keren banget Hanif, sukses terus buat AI Developer-nya!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // --- VARIABEL ANIMASI ---
+            const canvas = document.getElementById('fxCanvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            let animationFrameId; // ID untuk mematikan animasi nanti
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = [];
+            const particleCount = 250; 
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            for (let i = 0; i < particleCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.max(width, height) * (Math.random() * 0.5 + 0.5);
+                particles.push({
+                    x: centerX + Math.cos(angle) * radius,
+                    y: centerY + Math.sin(angle) * radius,
+                    targetX: centerX, targetY: centerY,
+                    size: Math.random() * 2 + 1,
+                    speed: Math.random() * 0.04 + 0.02 
+                });
+            }
+
+            let lightningPath = null;
+            let boltOpacity = 0;
+            
+            function generateLightning() {
+                const startX = width / 2; const startY = 0; const endY = height;
+                const segments = []; let x = startX; let y = startY;
+
+                while (y < endY) {
+                    let nextY = y + Math.random() * 30 + 20;
+                    let nextX = x + (Math.random() - 0.5) * 100; 
+                    segments.push({ x1: x, y1: y, x2: nextX, y2: nextY });
+                    if (Math.random() < 0.15) {
+                        let bx = nextX; let by = nextY;
+                        for (let i = 0; i < 3; i++) {
+                            let bNextX = bx + (Math.random() - 0.5) * 60;
+                            let bNextY = by + Math.random() * 30 + 10;
+                            segments.push({ x1: bx, y1: by, x2: bNextX, y2: bNextY });
+                            bx = bNextX; by = bNextY;
+                        }
+                    }
+                    x = nextX; y = nextY;
+                }
+                lightningPath = segments; boltOpacity = 1; 
+            }
+
+            function drawLightning() {
+                if (!lightningPath || boltOpacity <= 0) return;
+                ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+                ctx.beginPath(); ctx.strokeStyle = `rgba(59, 130, 246, ${boltOpacity * 0.3})`;
+                ctx.lineWidth = 30; ctx.filter = 'blur(15px)';
+                lightningPath.forEach(seg => { ctx.moveTo(seg.x1, seg.y1); ctx.lineTo(seg.x2, seg.y2); });
+                ctx.stroke();
+
+                ctx.beginPath(); ctx.strokeStyle = `rgba(96, 165, 250, ${boltOpacity * 0.6})`;
+                ctx.lineWidth = 12; ctx.filter = 'blur(5px)';
+                lightningPath.forEach(seg => { ctx.moveTo(seg.x1, seg.y1); ctx.lineTo(seg.x2, seg.y2); });
+                ctx.stroke();
+
+                ctx.beginPath(); ctx.strokeStyle = `rgba(255, 255, 255, ${boltOpacity})`;
+                ctx.lineWidth = 3; ctx.filter = 'none';
+                lightningPath.forEach(seg => { ctx.moveTo(seg.x1, seg.y1); ctx.lineTo(seg.x2, seg.y2); });
+                ctx.stroke();
+                ctx.restore(); boltOpacity -= 0.03; 
+            }
+
+            let textAppeared = false;
+            function animate() {
+                ctx.fillStyle = 'rgba(3, 10, 22, 0.5)'; 
+                ctx.fillRect(0, 0, width, height);
+
+                let allArrived = true;
+                particles.forEach(p => {
+                    p.x += (p.targetX - p.x) * p.speed;
+                    p.y += (p.targetY - p.y) * p.speed;
+                    if (Math.hypot(p.x - centerX, p.y - centerY) > 20) allArrived = false;
+
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, 0.9)`;
+                    ctx.shadowBlur = 8; ctx.shadowColor = '#ffffff'; 
+                    ctx.fill(); ctx.shadowBlur = 0;
+                });
+
+                if (allArrived && !textAppeared) {
+                    textAppeared = true;
+                    document.getElementById('introContent').classList.add('show');
+                    generateLightning();
+                    startLoading();
+                }
+
+                drawLightning();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+            animate();
+
+            // FUNGSI UNTUK MEMATIKAN ANIMASI & MEMUAT SPOTIFY
+            function finishIntro() {
+                const introScreen = document.getElementById('introLoading');
+                introScreen.classList.add('fade-out');
+                
+                // 1. Hentikan animasi Canvas biar HP gak ngeleg
+                cancelAnimationFrame(animationFrameId);
+                
+                // 2. Hapus elemen Canvas & Intro dari DOM setelah transisi selesai
+                setTimeout(() => {
+                    introScreen.remove(); 
+                    
+                    // 3. Muat Iframe Spotify SETELAH layar pembuka hilang
+                    const spotifyContainer = document.getElementById('spotifyContainer');
+                    spotifyContainer.innerHTML = `
+                        <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/1ooo6VdJFEiyPf721hygGy?utm_source=generator&theme=0" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    `;
+                }, 800); 
+            }
+
+            function startLoading() {
+                const progressBar = document.getElementById('progressBar');
+                const loadPercent = document.getElementById('loadPercent');
+                let progress = 0;
+
+                let loadInterval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 2) + 1; 
+                    if (progress >= 100) {
+                        progress = 100; 
+                        clearInterval(loadInterval);
+                        setTimeout(finishIntro, 500); // Panggil fungsi finishIntro
+                    }
+                    progressBar.style.width = progress + '%';
+                    loadPercent.innerText = progress + '%';
+                    if(progress >= 60 && progress <= 63) generateLightning();
+                }, 40); 
+            }
+
+            // --- LOGIKA WEBSITE UTAMA ---
+            const sections = document.querySelectorAll("section");
+            const navLinks = document.querySelectorAll(".navbar a");
+
+            window.onscroll = () => {
+                let current = "";
+                sections.forEach((section) => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 150) current = section.getAttribute("id");
+                });
+                navLinks.forEach((link) => {
+                    link.classList.remove("active");
+                    if (link.getAttribute("href").includes(current)) link.classList.add("active");
+                });
+            };
+
+            window.openTab = function(tabName, btnElement) {
+                let tabContents = document.getElementsByClassName("tab-content");
+                for (let i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+                let tabBtns = document.getElementsByClassName("tab-btn");
+                for (let i = 0; i < tabBtns.length; i++) tabBtns[i].classList.remove("active");
+                document.getElementById(tabName).classList.add("active");
+                btnElement.classList.add("active");
+            }
+
+            // Komentar Lokal
+            const commentForm = document.getElementById('commentForm');
+            const commentList = document.getElementById('commentList');
+            commentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('cName').value;
+                const text = document.getElementById('cText').value;
+                const initial = name.charAt(0).toUpperCase();
+                const newComment = document.createElement('div');
+                newComment.classList.add('comment-item');
+                newComment.innerHTML = `
+                    <div class="avatar">${initial}</div>
+                    <div class="comment-content">
+                        <h4>${name} <span>Baru saja</span></h4>
+                        <p>${text}</p>
+                    </div>
+                `;
+                commentList.prepend(newComment);
+                commentForm.reset();
+            });
+        });
+
+        // --- LOGIKA MODAL RESUME (BUKA & TUTUP) ---
+        function openResume() {
+            const modal = document.getElementById('resumeModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeResume() {
+            const modal = document.getElementById('resumeModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; 
+        }
+
+        document.getElementById('resumeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeResume();
+            }
+        });
+    </script>
+</body>
+</html>
